@@ -17,6 +17,7 @@ public class MainActivity extends Activity
     protected Button myButton1 ;
     protected Button myButton2 ;
     protected Button myButton3 ;
+    protected Button myButton4 ;
     //------------------------------
     @Override
     protected void onCreate(Bundle savedInstanceState)
@@ -24,9 +25,10 @@ public class MainActivity extends Activity
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         mContext = this ;
-        myButton1 = (Button)findViewById(R.id.button1) ;
-        myButton2 = (Button)findViewById(R.id.button2) ;
-        myButton3 = (Button)findViewById(R.id.button3) ;
+        myButton1 = (Button)findViewById(R.id.buttonPhoto) ;
+        myButton2 = (Button)findViewById(R.id.buttonPick) ;
+        myButton3 = (Button)findViewById(R.id.buttonQuit) ;
+        myButton4 = (Button)findViewById(R.id.buttonLoad) ;
         //------------------------------------
         myButton1.setOnClickListener(new Button.OnClickListener()
         {
@@ -50,6 +52,14 @@ public class MainActivity extends Activity
             public void onClick(View v)
             {
                 AndroidQuit();
+            }
+        });
+        myButton4.setOnClickListener(new View.OnClickListener()
+        {
+            @Override
+            public void onClick(View v)
+            {
+                TakePhoto("loadDefault") ;
             }
         });
     }

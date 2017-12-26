@@ -31,31 +31,35 @@ import java.io.IOException;
 
 public class WebViewActivity extends Activity
 {
-    protected ImageView imageView = null;
     public static final int NONE = 0;
-
+    protected Context mContext = null;
+    //debug
+    protected ImageView imageView = null;//debug display
+    protected final boolean isDebugView = true ;//debug imageView
+    protected final boolean isDebugMode = false ;//debug tag
+    protected String sTAG = "myApp.TAG" ;//Debug tag name
+    //onActivityResult code
     public static final int REQUEST_CODE_TAKE_PHOTO = 1 ;// 拍照
     public static final int REQUEST_CODE_PICK_IMAGE = 2;//相冊
     public static final int REQUEST_CODE_CROP_IMAGE = 3;//裁剪
     private static final int REQUEST_CODE_PERMISSION = 272 ;//相機申請權限
     private static final int REQUEST_CODE_STORAGE_PERMISSIONS = 273 ;//本地存儲權限
-
+    //define filename
     public final static String DEFAULT_IMAGE_TEMP_FILE = "temp.jpg" ;//原始照相圖檔
-    public final static String DEFAULT_IMAGE_FILE_NAME= "image.png";//經裁剪後圖檔(拍照或相冊)
-
+    public final static String DEFAULT_IMAGE_FILE_NAME = "image.png";//經裁剪後圖檔(拍照或相冊)
+    public final static String DEFAULT_IMAGE_CROP_FILE =  "bitmap.png";//裁剪後轉存
+    //
     protected Uri imageUri ;//拍照Uri
     protected Uri outputUri;//定義為全局的Uri變量，因為運行時發現裁剪過後顯示的還是未裁剪的圖片，查看相冊時發現有新建的文件夾存儲裁剪後的圖片，所以應該把裁剪後的Uri存下來。下面onActivityResult函數里需要將獲取到的uri轉化為絕對路徑傳給untiy
-
-    protected String sTAG = "PressedTrominProject" ;//Debug
-    protected String sPackageName = "com.tromin.myapp";//"com.tromin.demo_0819" ;
 
     @Override
     protected void onCreate(Bundle savedInstanceState)
     {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_photo);
+        mContext = this;
 
-        imageView = (ImageView) this.findViewById(R.id.imageID);
+        if (isDebugView) imageView = (ImageView) this.findViewById(R.id.imageID);
 
         String type = this.getIntent().getStringExtra("type");
 
@@ -92,7 +96,7 @@ public class WebViewActivity extends Activity
                 startTakePhotoActivity();
             }
         }
-        else//相冊
+        else if(type.equals("openAlbum"))//相冊
         {
             //在android 6.0以後，則需要申請權限，先來調用相機拍照。
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M)//檢查權限
@@ -111,6 +115,10 @@ public class WebViewActivity extends Activity
                 startPickImageActivity();
             }
         }
+        else
+        {
+            LoadBitmap() ;
+        }
     }
     //拍照
     public void startTakePhotoActivity()
@@ -119,9 +127,9 @@ public class WebViewActivity extends Activity
         intent.setAction(MediaStore.ACTION_IMAGE_CAPTURE);//設置Action為拍照
         String mFilePath = Environment.getExternalStorageDirectory().getPath() + "/" + DEFAULT_IMAGE_TEMP_FILE;// 指定路径
         File file = new File(mFilePath);
-        Log.i(sTAG,"onActivityStart=1=ACTION_IMAGE_CAPTURE");
+        if (isDebugMode) Log.i(sTAG,"onActivityStart=1=ACTION_IMAGE_CAPTURE");
 
-        boolean isVersion2 = true ;
+        boolean isVersion2 = true ;//test
         if (isVersion2)
         {
             //針對Android7.0，需要通過FileProvider封裝過的路徑，提供給外部調用
@@ -180,7 +188,7 @@ public class WebViewActivity extends Activity
     //相冊
     public void startPickImageActivity()
     {
-        Log.i(sTAG,"onActivityStart=2=ACTION_PICK");
+        if (isDebugMode) Log.i(sTAG,"onActivityStart=2=ACTION_PICK");
         //打開相冊
         Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
         intent.setType("image/*");
@@ -198,7 +206,7 @@ public class WebViewActivity extends Activity
     //裁剪
     public void startCropImageActivity(Uri uri)
     {
-        Log.i(sTAG,"onActivityStart=3=com.android.camera.action.CROP");
+        if (isDebugMode) Log.i(sTAG,"onActivityStart=3=com.android.camera.action.CROP");
         //
         Intent intent = new Intent("com.android.camera.action.CROP");
         File file = new File(Environment.getExternalStorageDirectory().getPath()+ "/" + DEFAULT_IMAGE_FILE_NAME);
@@ -230,14 +238,14 @@ public class WebViewActivity extends Activity
     protected void onActivityResult(int requestCode, int resultCode, Intent data)
     {
         super.onActivityResult(requestCode, resultCode, data);
-        Log.i(sTAG,"onActivityResult=4=resultCode="+resultCode);
+        if (isDebugMode) Log.i(sTAG,"onActivityResult=4=resultCode="+resultCode);
         if (resultCode == NONE) return;
 
-        Log.i(sTAG,"onActivityResult=5=requestCode="+requestCode);
+        if (isDebugMode) Log.i(sTAG,"onActivityResult=5=requestCode="+requestCode);
         switch (requestCode)
         {
             case REQUEST_CODE_TAKE_PHOTO:// 拍照
-                Log.i(sTAG,"onActivityResult=6=imageUri="+imageUri) ;
+                if (isDebugMode) Log.i(sTAG,"onActivityResult=6=imageUri="+imageUri) ;
                 //設置文件保存路徑這裡放在跟目錄下
                 startCropImageActivity(imageUri);
                 break;
@@ -249,19 +257,19 @@ public class WebViewActivity extends Activity
                 {
                     File file = new File(Environment.getExternalStorageDirectory().getPath()+ "/" + DEFAULT_IMAGE_FILE_NAME);
                     Uri newUri = FileProvider.getUriForFile(this, "com.tromin.myapp.fileprovider", file);
-                    Log.i(sTAG,"onActivityResult=7.1="+newUri);
+                    if (isDebugMode) Log.i(sTAG,"onActivityResult=7.1="+newUri);
                     startCropImageActivity(newUri) ;
                 }
                 else
                 {
                     Uri dataUri = data.getData();
-                    Log.i(sTAG,"onActivityResult=7="+dataUri);
+                    if (isDebugMode) Log.i(sTAG,"onActivityResult=7="+dataUri);
                     startCropImageActivity(dataUri);
                 }
                 break;
             case REQUEST_CODE_CROP_IMAGE:// 處理裁剪結果
                 String imagePath = outputUri.getPath();
-                Log.i(sTAG,"onActivityResult=8=CropDoneImage="+imagePath);
+                if (isDebugMode) Log.i(sTAG,"onActivityResult=8=CropDoneImage="+imagePath);
 /*
                                  Bundle extras = data.getExtras();
                                  if (extras != null)
@@ -286,18 +294,19 @@ public class WebViewActivity extends Activity
                 Bitmap bitmap = getBitmapFromUri(outputUri, this);
                 if (bitmap != null)
                 {
-                   imageView.setImageBitmap(bitmap);
+                    if (isDebugView) imageView.setImageBitmap(bitmap);
                     try
                     {
+                        if (isDebugMode) Log.i(sTAG,"onActivityResult=9=");
                         //將imagePath傳給unity
                         // UnityPlayer.UnitySendMessage("AndroidAlbumCamera", "GetImagePath", imagePath);
                         SaveBitmap(bitmap) ;
+                        if (isDebugMode == false) finish() ;
                     }
                     catch (IOException e)
                     {
                         e.printStackTrace();
                     }
-
                 }
                 break ;
         }
@@ -389,17 +398,17 @@ public class WebViewActivity extends Activity
         FileOutputStream fOut = null;
         //Unity:Application.persistentDataPath => android: /data/data/Name/files
         //請大家一定要注意這個路徑的寫法， 前面一定要加 「File://」 不然無法讀取。
-        String path = "/mnt/sdcard/Android/data/" + sPackageName + "/files";
+        String sPath = mContext.getFilesDir().getPath() ;//String sPath = "/mnt/sdcard/Android/data/" + sPackageName + "/files";
         try
         {
-            Log.i(sTAG,"onActivityResult=A=SaveBitmap="+path);
+            if (isDebugMode) Log.i(sTAG,"onActivityResult=A=SaveBitmap="+sPath);
             //查看這個路徑是否存在，如果並沒有這個路徑，創建這個路徑
-            File destDir = new File(path);
+            File destDir = new File(sPath);
             if (!destDir.exists())
             {
                 destDir.mkdirs();
             }
-            fOut = new FileOutputStream(path + "/" + "bitmap.png") ;
+            fOut = new FileOutputStream(sPath + "/" + DEFAULT_IMAGE_CROP_FILE) ;
         }
         catch (FileNotFoundException e)
         {
@@ -410,6 +419,7 @@ public class WebViewActivity extends Activity
         try
         {
             fOut.flush();
+            if (isDebugMode) Log.i(sTAG,"onActivityResult=B");
         }
         catch (IOException e)
         {
@@ -418,10 +428,26 @@ public class WebViewActivity extends Activity
         try
         {
             fOut.close();
+            if (isDebugMode) Log.i(sTAG,"onActivityResult=C");
         }
         catch (IOException e)
         {
             e.printStackTrace();
+        }
+    }
+    //
+    public void LoadBitmap()
+    {
+        String sPath = mContext.getFilesDir().getPath() ;
+        File file = new File(sPath + "/" + DEFAULT_IMAGE_CROP_FILE);
+        Uri photoURI = FileProvider.getUriForFile(WebViewActivity.this, "com.tromin.myapp.fileprovider", file);
+
+        if (isDebugMode) Log.i(sTAG,"onActivityResult=D="+photoURI);
+        Bitmap bitmap = getBitmapFromUri(photoURI, this);
+        if (bitmap != null)
+        {
+            imageView.setImageBitmap(bitmap);
+            if (isDebugMode) Log.i(sTAG,"onActivityResult=E=");
         }
     }
 }
