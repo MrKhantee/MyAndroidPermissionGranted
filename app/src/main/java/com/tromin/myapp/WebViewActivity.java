@@ -401,13 +401,14 @@ public class WebViewActivity extends Activity
         String sPath = mContext.getFilesDir().getPath() ;//String sPath = "/mnt/sdcard/Android/data/" + sPackageName + "/files";
         try
         {
-            if (isDebugMode) Log.i(sTAG,"onActivityResult=A=SaveBitmap="+sPath);
             //查看這個路徑是否存在，如果並沒有這個路徑，創建這個路徑
             File destDir = new File(sPath);
             if (!destDir.exists())
             {
                 destDir.mkdirs();
+                if (isDebugMode) Log.i(sTAG,"onActivityResult=A=SaveBitmap="+sPath);
             }
+            if (isDebugMode) Log.i(sTAG,"onActivityResult=B=SaveBitmap="+sPath+"/" + DEFAULT_IMAGE_CROP_FILE);
             fOut = new FileOutputStream(sPath + "/" + DEFAULT_IMAGE_CROP_FILE) ;
         }
         catch (FileNotFoundException e)
@@ -419,7 +420,7 @@ public class WebViewActivity extends Activity
         try
         {
             fOut.flush();
-            if (isDebugMode) Log.i(sTAG,"onActivityResult=B");
+            if (isDebugMode) Log.i(sTAG,"onActivityResult=C=done");
         }
         catch (IOException e)
         {
@@ -428,7 +429,7 @@ public class WebViewActivity extends Activity
         try
         {
             fOut.close();
-            if (isDebugMode) Log.i(sTAG,"onActivityResult=C");
+            if (isDebugMode) Log.i(sTAG,"onActivityResult=D=close file");
         }
         catch (IOException e)
         {
@@ -442,12 +443,12 @@ public class WebViewActivity extends Activity
         File file = new File(sPath + "/" + DEFAULT_IMAGE_CROP_FILE);
         Uri photoURI = FileProvider.getUriForFile(WebViewActivity.this, "com.tromin.myapp.fileprovider", file);
 
-        if (isDebugMode) Log.i(sTAG,"onActivityResult=D="+photoURI);
+        if (isDebugMode) Log.i(sTAG,"onActivityResult=E="+photoURI);
         Bitmap bitmap = getBitmapFromUri(photoURI, this);
         if (bitmap != null)
         {
             imageView.setImageBitmap(bitmap);
-            if (isDebugMode) Log.i(sTAG,"onActivityResult=E=");
+            if (isDebugMode) Log.i(sTAG,"onActivityResult=F=");
         }
     }
 }
