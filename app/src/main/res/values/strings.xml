@@ -1,7 +1,7 @@
 <resources>
-    <string name="app_name">MyApp</string>
-    <string name="string_photo">拍照</string>
-    <string name="string_pick">相冊</string>
+    <string name="app_name">MyAndroidPermissionGranted</string>
+    <string name="string_photo">Photo</string>
+    <string name="string_pick">Pick</string>
     <string name="string_Quit">EXIT</string>
-    <string name="string_load">載入裁剪結果</string>
+    <string name="string_load">Load</string>
 </resources>
